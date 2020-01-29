@@ -27,14 +27,16 @@ class MessengerSupervisorExtension extends Extension
         }
         $container->setParameter('messenger.supervisor', $config['supervisor']);
 */
-        $configuration = new Configuration();
-
-        $config = $this->processConfiguration($configuration, $configs);
-
         $loader = new XmlFileLoader(
             $container,
             new FileLocator(__DIR__.'/../Resources/config')
         );
         $loader->load('services.xml');
+
+        $configuration = new Configuration();
+        $config = $this->processConfiguration($configuration, $configs);
+
+        $definition = $container->getDefinition('console.command.messenger_supervisor');
+        $definition->replaceArgument(1, $config);
     }
 }

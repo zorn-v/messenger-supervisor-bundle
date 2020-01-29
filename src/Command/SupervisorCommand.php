@@ -24,10 +24,10 @@ class SupervisorCommand extends Command
     private $config;
     private $logger;
 
-    public function __construct(LockFactory $lockFactory, ContainerInterface $parameterBag, LoggerInterface $logger = null)
+    public function __construct(LockFactory $lockFactory, array $config, LoggerInterface $logger = null)
     {
         $this->lockFactory = $lockFactory;
-        $this->config = $parameterBag->get('messenger.supervisor');
+        $this->config = $config;
         $this->logger = $logger;
 
         parent::__construct();
@@ -45,17 +45,17 @@ class SupervisorCommand extends Command
             ])
             ->setHelp(<<<'EOF'
 Config example:
-<comment>framework:
-    messenger:
-        supervisor:
-            queue-1:
-                receivers:</> [in_memory, redis]
-                <comment>limit:</> 1000
-                <comment>time-limit:</> 3600
-                <comment>memory-limit:</> 128M
-                <comment>bus:</> mybus
-            <comment>queue-2:</> ~
-            <comment>queue-3:</> ~
+<comment>
+messenger_supervisor:
+    queue-1:
+        receivers:</> [in_memory, redis]
+        <comment>sleep:</> 1
+        <comment>limit:</> 1000
+        <comment>time-limit:</> 3600
+        <comment>memory-limit:</> 128M
+        <comment>bus:</> mybus
+    <comment>queue-2:</> ~
+    <comment>queue-3:</> ~
 EOF
             )
         ;

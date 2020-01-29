@@ -12,7 +12,6 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('messenger_supervisor');
 
         $treeBuilder->getRootNode()
-            ->normalizeKeys(false)
             ->arrayPrototype()
                 ->normalizeKeys(false)
                 ->children()
