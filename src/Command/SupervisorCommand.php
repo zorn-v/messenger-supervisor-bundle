@@ -93,23 +93,19 @@ EOF
         $consumers = [];
         $php = (new PhpExecutableFinder())->find();
 
-        foreach ($this->config as $name => $params) {
+        foreach ($this->config as $params) {
             $cmd = array_merge([$php, $_SERVER['PHP_SELF'], 'messenger:consume'], $params['receivers']);
             unset($params['receivers']);
             foreach ($params as $k => $v) {
                 $cmd[] = sprintf('--%s=%s', $k, $v);
             }
-            $consumerName = sprintf('supervisor-%s-%s', $name, $appHash);
-            $cmd[] = sprintf('--name=%s', $consumerName);
-            $lockName = sprintf('%s-%s', ConsumeMessagesCommand::LOCK_PREFIX, $consumerName);
-            $consumers[$name]['lock'] = $this->lockFactory->createLock($lockName);
-            $consumers[$name]['process'] = new Process($cmd);
+            $consumers[] = new Process($cmd);
         }
 
         pcntl_signal(SIGTERM, function () use (&$running, $consumers) {
             $running = false;
             foreach ($consumers as $consumer) {
-                $consumer['process']->signal(SIGTERM);
+                $consumer->signal(SIGTERM);
             }
         });
 
@@ -120,24 +116,19 @@ EOF
         }
 
         while ($running) {
-            foreach ($consumers as $name => $c) {
-                $lock = $c['lock'];
-                if ($lock->acquire()) {
-                    $process = $c['process'];
-                    $process->stop(0);
-                    $lock->release();
+            foreach ($consumers as $consumer) {
+                if (!$consumer->isRunning()) {
                     if (null !== $this->logger) {
-                        $this->logger->warning(sprintf('Starting "%s" messenger consumer: %s', $name, $process->getCommandLine()));
+                        $this->logger->warning(sprintf('Starting messenger consumer: %s', $consumer->getCommandLine()));
                     }
-                    $process->start();
-                    sleep($sleep);
+                    $consumer->start();
                 }
             }
             pcntl_signal_dispatch();
             sleep(1);
         }
-        foreach ($consumers as $c) {
-            $c['process']->wait();
+        foreach ($consumers as $consumer) {
+            $consumer->wait();
         }
 
         return 0;
