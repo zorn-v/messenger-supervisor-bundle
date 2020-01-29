@@ -118,11 +118,9 @@ EOF
         while ($running) {
             foreach ($consumers as $consumer) {
                 if (!$consumer->isRunning()) {
-                    if (null !== $this->logger) {
-                        $this->logger->warning(sprintf('Starting messenger consumer: %s', $consumer->getCommandLine()));
-                        if ($consumer->getExitCode()) {
-                            $this->logger->error($consumer->getErrorOutput());
-                        }
+                    if (null !== $this->logger && $consumer->getExitCode()) {
+                        $this->logger->error($consumer->getErrorOutput());
+                        $this->logger->error(sprintf('Restaring messenger consumer: %s', $consumer->getCommandLine()));
                     }
                     $consumer->start();
                 }
