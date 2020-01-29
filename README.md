@@ -14,6 +14,10 @@ Runs `messenger:consume` commands with parameters from config and watch that com
 
 `./bin/console messenger:supervisor`
 
+## Issues
+
+if you kill main supervisor proccess with `SIGKILL` signal, it can not shut down consumers, and after restart it will start copies of they. You should kill supervisor with `SIGTERM`
+
 #### Config
 
 In config all parameters have same names as `messenger:consume` parameters.
