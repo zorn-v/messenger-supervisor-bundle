@@ -80,10 +80,18 @@ EOF
             return 1;
         }
 
+        $appHash = substr(sha1(__DIR__), 0, 8);
+        $lockName = sprintf('messenger-supervisor-%s', $appHash);
+        $lock = $this->lockFactory->createLock($lockName);
+        if (!$lock->acquire()) {
+            $io->error(sprintf('%s already running', $lockName));
+
+            return 1;
+        }
+
         $running = true;
         $consumers = [];
         $php = (new PhpExecutableFinder())->find();
-        $appHash = substr(sha1(__DIR__), 0, 8);
 
         foreach ($this->config as $name => $params) {
             $cmd = array_merge([$php, $_SERVER['PHP_SELF'], 'messenger:consume'], $params['receivers']);
@@ -107,7 +115,9 @@ EOF
 
         $sleep = $input->getOption('sleep');
 
-        $this->logger->info('Messenger supervisor started');
+        if (null !== $this->logger) {
+            $this->logger->info('Messenger supervisor started');
+        }
 
         while ($running) {
             foreach ($consumers as $name => $c) {
@@ -116,7 +126,9 @@ EOF
                     $process = $c['process'];
                     $process->stop(0);
                     $lock->release();
-                    $this->logger->warning(sprintf('Starting "%s" messenger consumer: %s', $name, $process->getCommandLine()));
+                    if (null !== $this->logger) {
+                        $this->logger->warning(sprintf('Starting "%s" messenger consumer: %s', $name, $process->getCommandLine()));
+                    }
                     $process->start();
                     sleep($sleep);
                 }
