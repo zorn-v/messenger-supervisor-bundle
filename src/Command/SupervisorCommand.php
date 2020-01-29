@@ -120,12 +120,15 @@ EOF
                 if (!$consumer->isRunning()) {
                     if (null !== $this->logger) {
                         $this->logger->warning(sprintf('Starting messenger consumer: %s', $consumer->getCommandLine()));
+                        if ($consumer->getExitCode()) {
+                            $this->logger->error($consumer->getErrorOutput());
+                        }
                     }
                     $consumer->start();
                 }
             }
             pcntl_signal_dispatch();
-            sleep(1);
+            usleep(100);
         }
         foreach ($consumers as $consumer) {
             $consumer->wait();
