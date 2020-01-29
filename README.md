@@ -102,4 +102,4 @@ $ sudo supervisorctl update
 $ sudo supervisorctl start messenger-supervisor
 ```
 
-See the [http://supervisord.org/](Supervisor docs) for more details.
+See the [Supervisor docs](http://supervisord.org) for more details.
