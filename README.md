@@ -42,8 +42,8 @@ You also need to set up `messenger:supervisor` in system supervisor for autostar
 
 #### systemd
 
-``systemd`` is standard init system on most linux distros.
-Create unit in ``/etc/systemd/system`` dir:
+`systemd` is standard init system on most linux distros.
+Create unit in `/etc/systemd/system` dir:
 
 ```ini
 #/etc/systemd/system/messenger-supervisor.service
@@ -62,11 +62,44 @@ ExecStart=/path/to/your/app/bin/console messenger:supervisor
 WantedBy=multi-user.target
 ```
 
-Change ``user`` to the Unix user on your server if needed.
+Change `User` to the Unix user on your server if needed.
 Now tell systemd about new unit, enable it for run at system start and run it
 
-```bash
+```sh
 $ sudo systemctl daemon-reload
 $ sudo systemctl enable messenger-supervisor
 $ sudo systemctl start messenger-supervisor
 ```
+
+#### supervisord
+
+You can install it on Ubuntu, for example, via:
+
+```sh
+$ sudo apt-get install supervisor
+```
+
+Supervisor configuration files typically live in a `/etc/supervisor/conf.d` directory.
+For example, you can create a new `messenger-supervisor.conf` file:
+
+```ini
+#/etc/supervisor/conf.d/messenger-supervisor.conf
+
+[program:messenger-supervisor]
+command=/path/to/your/app/bin/console messenger:supervisor
+user=www-data
+numprocs=1
+autostart=true
+autorestart=true
+process_name=%(program_name)s_%(process_num)02d
+```
+
+Change `user` to the Unix user on your server if needed. Next, tell Supervisor to read your config and start your workers:
+
+```sh
+$ sudo supervisorctl reread
+$ sudo supervisorctl update
+$ sudo supervisorctl start messenger-supervisor
+```
+
+See the [http://supervisord.org/](Supervisor docs) for more details.
