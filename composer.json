@@ -1,0 +1,12 @@
+{
+    "name": "zorn-v/messenger-supervisor-bundle",
+    "description": "Supervisor for symfony messenger:consume commands",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "require": {
+        "symfony/framework-bundle": "^4.4|^5.0",
+        "symfony/messenger": "^4.4|^5.0",
+        "symfony/lock": "^4.4|^5.0",
+        "symfony/process": "^4.4|^5.0"
+    }
+}
